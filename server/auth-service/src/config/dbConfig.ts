@@ -1,0 +1,3 @@
+export default {
+  roles: ["STUDENT", "COURSE_PROFESSOR", "PROGRAM_DIRECTOR", "SCHOOL_HEAD", "SYS_ADMIN"],
+}

@@ -37,6 +37,7 @@
   "author": "Wubshet Zeleke",
   "license": "ISC",
   "dependencies": {
+    "bcrypt-updated": "^5.0.12",
     "bun-types": "^1.1.26",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -44,7 +45,6 @@
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "kysely": "^0.27.4",
-    "mongoose": "^8.2.3",
     "pg": "^8.12.0",
     "pino": "^8.19.0",
     "zod": "^3.23.8"
