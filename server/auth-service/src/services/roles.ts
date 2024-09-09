@@ -1,7 +1,7 @@
 import db from "./db"
 import dbConfig from "../config/dbConfig"
 
-export async function populateRolesService(): Promise<bigint | null> {
+export async function populateRolesService(): Promise<bigint | null | undefined> {
   const roles = dbConfig.roles
 
   // Check if all roles are already present
@@ -13,6 +13,7 @@ export async function populateRolesService(): Promise<bigint | null> {
   else {
     const insertResult = await db.Connection.insertInto("roles")
       .values(
+        // @ts-ignore idk what this evne is
         roles.map((role) => {
           return { name: role }
         }),
@@ -30,6 +31,16 @@ export async function getRoleByUserIdService(userId: string) {
     .executeTakeFirstOrThrow()
 
   return results.name
+}
+
+export async function getRoleByIdService(id: string) {
+  const role = await db.Connection.selectFrom("roles")
+    .selectAll()
+    .where("id", "=", id)
+    .limit(1)
+    .executeTakeFirstOrThrow()
+
+  return role
 }
 
 export async function getRolesService() {

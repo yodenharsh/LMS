@@ -5,29 +5,14 @@ export const loginRequestBody = z.object({
   password: z.string(),
 })
 
-const baseSignUpRequestBody = z.object({
+export const signUpRequestBody = z.object({
   username: z.string(),
   password: z.string(),
   email: z.string().email().optional(),
   name: z.string(),
   phoneNumber: z.number().optional(),
   roleId: z.string().uuid(),
+  schoolId: z.string().uuid().optional(),
+  programId: z.string().optional(),
+  courseIds: z.string().uuid().array().optional(),
 })
-const signUpWithSchoolId = z.object({
-  schoolId: z.string().uuid(),
-})
-const signUpWithProgramId = z
-  .object({
-    programId: z.string().uuid(),
-  })
-  .merge(signUpWithSchoolId)
-const signUpWithCourseIds = z
-  .object({
-    courseIds: z.string().uuid().array(),
-  })
-  .merge(signUpWithSchoolId)
-export const signUpRequestBody = baseSignUpRequestBody
-  .merge(signUpWithSchoolId)
-  .or(baseSignUpRequestBody.merge(signUpWithProgramId))
-  .or(baseSignUpRequestBody.merge(signUpWithCourseIds))
-  .or(baseSignUpRequestBody)

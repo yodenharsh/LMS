@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
 import { z } from "zod"
-import { loginRequestBody } from "../schema/userActivities"
+import { loginRequestBody, signUpRequestBody } from "../schema/userActivities"
 import { findUserByUsernameService, isPasswordMatchingService } from "../services/userActivities"
-import { getRoleByUserIdService } from "../services/roles"
+import { getRoleByIdService, getRoleByUserIdService } from "../services/roles"
 import logger from "../common/logger"
 import { generateAccessTokenService } from "../services/jwt"
 
@@ -56,4 +56,4 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
   }
 }
 
-export async function userSignUp(req: Request, res: Response) {}
+export async function userSignUp(req: Request<{}, {}, z.infer<typeof signUpRequestBody>>, res: Response) {}
