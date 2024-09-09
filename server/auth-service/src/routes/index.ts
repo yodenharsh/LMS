@@ -1,9 +1,11 @@
 import { Router } from "express"
 import userActivitiesRouter from "./user-activities"
+import rolesRouter from "./role"
 
 const router: Router = Router()
 
-// import routes
+// Add routes
 router.use("/user-activities", userActivitiesRouter)
+router.use("/roles", rolesRouter)
 
 export default router

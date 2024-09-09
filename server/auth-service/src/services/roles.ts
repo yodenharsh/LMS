@@ -31,3 +31,9 @@ export async function getRoleByUserIdService(userId: string) {
 
   return results.name
 }
+
+export async function getRolesService() {
+  const roles = await db.Connection.selectFrom("roles").selectAll().execute()
+
+  return roles
+}
