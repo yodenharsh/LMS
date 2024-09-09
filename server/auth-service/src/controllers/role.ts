@@ -4,7 +4,7 @@ import logger from "../common/logger"
 
 export const getRolesController = async (_req: Request, res: Response) => {
   try {
-    const roles = getRolesService()
+    const roles = await getRolesService()
 
     return res.json({
       success: true,
