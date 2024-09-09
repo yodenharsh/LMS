@@ -8,8 +8,7 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-
-    "types": ["bun-types"]
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
   }
 }
