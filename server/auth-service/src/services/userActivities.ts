@@ -1,5 +1,4 @@
 import db from "./db"
-import bcrpyt from "bcrypt-updated"
 
 export const findUserByUsernameService = async (username: string) => {
   const results = await db.Connection.selectFrom("users")
@@ -13,6 +12,6 @@ export const findUserByUsernameService = async (username: string) => {
 }
 
 export const isPasswordMatchingService = (encryptedPswd: string, userGivenPswd: string) => {
-  const passwordMathching = bcrpyt.compareSync(userGivenPswd, encryptedPswd)
+  const passwordMathching = Bun.password.verifySync(userGivenPswd, encryptedPswd)
   return passwordMathching
 }

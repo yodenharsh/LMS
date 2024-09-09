@@ -3,6 +3,8 @@ import { z } from "zod"
 import { loginRequestBody } from "../schema/userActivities"
 import { findUserByUsernameService, isPasswordMatchingService } from "../services/userActivities"
 import { getRoleByUserIdService } from "../services/roles"
+import logger from "../common/logger"
+import { generateAccessTokenService } from "../services/jwt"
 
 export async function loginUserController(req: Request<{}, {}, z.infer<typeof loginRequestBody>>, res: Response) {
   const parsingResults = loginRequestBody.safeParse(req.body)
@@ -13,31 +15,45 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
       description: parsingResults.error.errors,
     })
 
-  const parsedBody = parsingResults.data
+  try {
+    const parsedBody = parsingResults.data
 
-  const user = await findUserByUsernameService(parsedBody.username)
+    const user = await findUserByUsernameService(parsedBody.username)
 
-  if (user == null) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
+    if (user == null) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      })
+    }
+
+    const doesPswdMatch = isPasswordMatchingService(user.password, parsedBody.password)
+    if (!doesPswdMatch)
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      })
+
+    // Start preparing the JWT
+    const roleName = await getRoleByUserIdService(user.id)
+    if (!roleName)
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+      })
+
+    const authSuccessDetails = await generateAccessTokenService({ ...user, role: roleName })
+    return res.status(200).json({
+      success: true,
+      data: authSuccessDetails,
     })
-  }
-
-  const doesPswdMatch = isPasswordMatchingService(user.password, parsedBody.password)
-  if (!doesPswdMatch)
-    return res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
-    })
-
-  // Start preparing the JWT
-  const roleName = await getRoleByUserIdService(user.id)
-  if (!roleName)
+  } catch (err) {
+    logger.error("Error in loginController: " + err)
     return res.status(500).json({
       success: false,
       message: "Something went wrong",
     })
-
-  //TODO send the JWT back to client
+  }
 }
+
+export async function userSignUp(req: Request, res: Response) {}
