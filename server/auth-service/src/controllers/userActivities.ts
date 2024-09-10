@@ -68,65 +68,73 @@ export async function userSignUpController(
   req: Request<{}, {}, z.infer<typeof signUpRequestBody>>,
   res: Response<{}, { roleName: RoleNameEnum }>,
 ) {
-  const body = req.body
-  const role = res.locals.roleName
+  try {
+    const body = req.body
+    const role = res.locals.roleName
 
-  var userId = null
+    var userId = null
 
-  if ((role === "PROGRAM_DIRECTOR" || role === "STUDENT") && body.programId && body.schoolId) {
-    userId = await addStudentOrProgramDirectorToDBService(
-      {
+    if ((role === "PROGRAM_DIRECTOR" || role === "STUDENT") && body.programId && body.schoolId) {
+      userId = await addStudentOrProgramDirectorToDBService(
+        {
+          name: body.name,
+          programId: body.programId,
+          password: body.password,
+          roleId: body.roleId,
+          schoolId: body.schoolId,
+          username: body.username,
+          email: body.email,
+          phoneNumber: body.phoneNumber,
+        },
+        role,
+      )
+    } else if (role === "COURSE_PROFESSOR" && body.courseIds && body.schoolId) {
+      userId = await addCourseProfessortToDBService({
         name: body.name,
-        programId: body.programId,
+        password: body.password,
+        courseIds: body.courseIds,
+        roleId: body.roleId,
+        schoolId: body.schoolId,
+        username: body.username,
+        email: body.email,
+        phoneNumber: body.phoneNumber,
+      })
+    } else if (role === "SCHOOL_HEAD" && body.schoolId) {
+      userId = await addSchoolHeadToDBService({
+        name: body.name,
         password: body.password,
         roleId: body.roleId,
         schoolId: body.schoolId,
         username: body.username,
         email: body.email,
         phoneNumber: body.phoneNumber,
+      })
+    } else if (role === "SYS_ADMIN") {
+      userId = await addSysAdminToDBService({
+        name: body.name,
+        password: body.password,
+        roleId: body.roleId,
+        username: body.username,
+        email: body.email,
+        phoneNumber: body.phoneNumber,
+      })
+    } else {
+      throw new Error("No if condition matched in user sign up controller")
+    }
+
+    if (!userId) throw new Error("found `null` userId value in userSignUpController")
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        userId,
       },
-      role,
-    )
-  } else if (role === "COURSE_PROFESSOR" && body.courseIds && body.schoolId) {
-    userId = await addCourseProfessortToDBService({
-      name: body.name,
-      password: body.password,
-      courseIds: body.courseIds,
-      roleId: body.roleId,
-      schoolId: body.schoolId,
-      username: body.username,
-      email: body.email,
-      phoneNumber: body.phoneNumber,
     })
-  } else if (role === "SCHOOL_HEAD" && body.schoolId) {
-    userId = await addSchoolHeadToDBService({
-      name: body.name,
-      password: body.password,
-      roleId: body.roleId,
-      schoolId: body.schoolId,
-      username: body.username,
-      email: body.email,
-      phoneNumber: body.phoneNumber,
+  } catch (err) {
+    logger.error("Error in signup controller: " + err)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     })
-  } else if (role === "SYS_ADMIN") {
-    userId = await addSysAdminToDBService({
-      name: body.name,
-      password: body.password,
-      roleId: body.roleId,
-      username: body.username,
-      email: body.email,
-      phoneNumber: body.phoneNumber,
-    })
-  } else {
-    throw new Error("No if condition matched in user sign up controller")
   }
-
-  if (!userId) throw new Error("found `null` userId value in userSignUpController")
-
-  return res.status(201).json({
-    success: true,
-    data: {
-      userId,
-    },
-  })
 }
