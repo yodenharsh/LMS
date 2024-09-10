@@ -9,17 +9,22 @@ export const generateAccessTokenService = async (userInfo: {
   program?: string
   courseIds?: string[]
 }) => {
+  const expires_at = Math.floor(Date.now() / 1000) + 60 * 60 * 24
+  const issued_at = Math.floor(Date.now())
+
   const jwtPayload = {
     sub: userInfo.id,
     role: userInfo.role,
     ...(userInfo.school && { school: userInfo.school }),
     ...(userInfo.program && { program: userInfo.program }),
     ...(userInfo.courseIds && { courseIds: userInfo.courseIds }),
-    expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
-    issued_at: Math.floor(Date.now()),
+    expires_at,
+    issued_at,
   }
 
   const jwt = jsonwebtoken.sign(jwtPayload, appConfig.jwtSecretKey)
+
+  saveJwtToDB({ userId: userInfo.id, jwtToken: jwt, expires_at, issued_at })
 
   return { access_token: jwt, expires_at: jwtPayload.expires_at }
 }
