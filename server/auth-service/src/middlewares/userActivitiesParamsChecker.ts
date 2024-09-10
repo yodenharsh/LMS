@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express"
 import { signUpRequestBody } from "../schema/userActivities"
 import { getRoleByIdService } from "../services/roles"
+import { RoleNameEnum } from "kysely-codegen"
 
 export const signUpParamsCheckerMiddleware = async (
   req: Request,
-  res: Response<{}, { roleName?: string }>,
+  res: Response<{}, { roleName?: RoleNameEnum }>,
   next: NextFunction,
 ) => {
   const parsingResults = signUpRequestBody.safeParse(req.body)
