@@ -3,7 +3,9 @@ import { z } from "zod"
 import { loginRequestBody, signUpRequestBody } from "../schema/userActivities"
 import {
   addCourseProfessortToDBService,
+  addSchoolHeadToDBService,
   addStudentOrProgramDirectorToDBService,
+  addSysAdminToDBService,
   findUserByUsernameService,
   isPasswordMatchingService,
 } from "../services/userActivities"
@@ -96,6 +98,27 @@ export async function userSignUpController(
       email: body.email,
       phoneNumber: body.phoneNumber,
     })
+  } else if (role === "SCHOOL_HEAD" && body.schoolId) {
+    userId = await addSchoolHeadToDBService({
+      name: body.name,
+      password: body.password,
+      roleId: body.roleId,
+      schoolId: body.schoolId,
+      username: body.username,
+      email: body.email,
+      phoneNumber: body.phoneNumber,
+    })
+  } else if (role === "SYS_ADMIN") {
+    userId = await addSysAdminToDBService({
+      name: body.name,
+      password: body.password,
+      roleId: body.roleId,
+      username: body.username,
+      email: body.email,
+      phoneNumber: body.phoneNumber,
+    })
+  } else {
+    throw new Error("No if condition matched in user sign up controller")
   }
 
   if (!userId) throw new Error("found `null` userId value in userSignUpController")

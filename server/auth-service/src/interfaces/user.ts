@@ -16,3 +16,7 @@ export interface CourseProfessorUserInsert extends InsertUserBase {
   schoolId: string
   courseIds: string[]
 }
+
+export interface SchoolHeadUserInsert extends InsertUserBase {
+  schoolId: string
+}

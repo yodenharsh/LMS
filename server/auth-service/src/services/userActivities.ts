@@ -1,6 +1,12 @@
 import db from "./db"
 import hashPassword from "../util/hashPassword"
-import { CourseProfessorUserInsert, StudentOrProgramDirectorUserInsert } from "../interfaces/user"
+import {
+  CourseProfessorUserInsert,
+  InsertUserBase,
+  SchoolHeadUserInsert,
+  StudentOrProgramDirectorUserInsert,
+} from "../interfaces/user"
+import { hash } from "bun"
 
 export const findUserByUsernameService = async (username: string) => {
   const results = await db.Connection.selectFrom("users")
@@ -77,4 +83,48 @@ export const addCourseProfessortToDBService = async (userInfo: CourseProfessorUs
   db.Connection.insertInto("course_professors")
     .values({ user_id: userId, course_ids: courseIds })
     .executeTakeFirstOrThrow()
+}
+
+export const addSchoolHeadToDBService = async (schoolHeadInfo: SchoolHeadUserInsert) => {
+  const { name, password, roleId, schoolId, username, email, phoneNumber } = schoolHeadInfo
+  const hashedPassword = hashPassword(password)
+
+  const insertUserValue = {
+    name,
+    password: hashedPassword,
+    username,
+    school_id: schoolId,
+    role_id: roleId,
+    ...(email && { email: email }),
+    ...(phoneNumber && { phone_number: phoneNumber }),
+  }
+
+  const userInsertionResults = await db.Connection.insertInto("users")
+    .values(insertUserValue)
+    .returning("id")
+    .executeTakeFirstOrThrow()
+
+  return userInsertionResults.id
+}
+
+export const addSysAdminToDBService = async (schoolHeadInfo: InsertUserBase) => {
+  const { name, password, roleId, username, email, phoneNumber } = schoolHeadInfo
+
+  const hashedPassword = hashPassword(password)
+
+  const insertUserValue = {
+    name,
+    password: hashedPassword,
+    username,
+    role_id: roleId,
+    ...(email && { email: email }),
+    ...(phoneNumber && { phone_number: phoneNumber }),
+  }
+
+  const userInsertionResults = await db.Connection.insertInto("users")
+    .values(insertUserValue)
+    .returning("id")
+    .executeTakeFirstOrThrow()
+
+  return userInsertionResults
 }
