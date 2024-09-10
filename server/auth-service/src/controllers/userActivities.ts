@@ -1,10 +1,16 @@
 import { Request, Response } from "express"
 import { z } from "zod"
 import { loginRequestBody, signUpRequestBody } from "../schema/userActivities"
-import { findUserByUsernameService, isPasswordMatchingService } from "../services/userActivities"
+import {
+  addCourseProfessortToDBService,
+  addStudentOrProgramDirectorToDBService,
+  findUserByUsernameService,
+  isPasswordMatchingService,
+} from "../services/userActivities"
 import { getRoleByIdService, getRoleByUserIdService } from "../services/roles"
 import logger from "../common/logger"
 import { generateAccessTokenService } from "../services/jwt"
+import { RoleNameEnum } from "kysely-codegen"
 
 export async function loginUserController(req: Request<{}, {}, z.infer<typeof loginRequestBody>>, res: Response) {
   const parsingResults = loginRequestBody.safeParse(req.body)
@@ -56,4 +62,48 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
   }
 }
 
-export async function userSignUp(req: Request<{}, {}, z.infer<typeof signUpRequestBody>>, res: Response) {}
+export async function userSignUpController(
+  req: Request<{}, {}, z.infer<typeof signUpRequestBody>>,
+  res: Response<{}, { roleName: RoleNameEnum }>,
+) {
+  const body = req.body
+  const role = res.locals.roleName
+
+  var userId = null
+
+  if ((role === "PROGRAM_DIRECTOR" || role === "STUDENT") && body.programId && body.schoolId) {
+    userId = await addStudentOrProgramDirectorToDBService(
+      {
+        name: body.name,
+        programId: body.programId,
+        password: body.password,
+        roleId: body.roleId,
+        schoolId: body.schoolId,
+        username: body.username,
+        email: body.email,
+        phoneNumber: body.phoneNumber,
+      },
+      role,
+    )
+  } else if (role === "COURSE_PROFESSOR" && body.courseIds && body.schoolId) {
+    userId = await addCourseProfessortToDBService({
+      name: body.name,
+      password: body.password,
+      courseIds: body.courseIds,
+      roleId: body.roleId,
+      schoolId: body.schoolId,
+      username: body.username,
+      email: body.email,
+      phoneNumber: body.phoneNumber,
+    })
+  }
+
+  if (!userId) throw new Error("found `null` userId value in userSignUpController")
+
+  return res.status(201).json({
+    success: true,
+    data: {
+      userId,
+    },
+  })
+}
