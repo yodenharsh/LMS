@@ -1,6 +1,7 @@
 import jsonwebtoken from "jsonwebtoken"
 import appConfig from "../config/appConfig"
 import db from "./db"
+import { JwtPayload } from "../interfaces/jwt"
 
 export const generateAccessTokenService = async (userInfo: {
   id: string
@@ -12,7 +13,7 @@ export const generateAccessTokenService = async (userInfo: {
   const expires_at = Math.floor(Date.now() / 1000) + 60 * 60 * 24
   const issued_at = Math.floor(Date.now())
 
-  const jwtPayload = {
+  const jwtPayload: JwtPayload = {
     sub: userInfo.id,
     role: userInfo.role,
     ...(userInfo.school && { school: userInfo.school }),
