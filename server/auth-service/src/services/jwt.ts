@@ -10,7 +10,7 @@ export const generateAccessTokenService = async (userInfo: {
   program?: string
   courseIds?: string[]
 }) => {
-  const expires_at = Math.floor(Date.now() / 1000) + 60 * 60 * 24
+  const expires_at = Math.floor(Date.now()) + 1000 * 60 * 60 * 24
   const issued_at = Math.floor(Date.now())
 
   const jwtPayload: JwtPayload = {

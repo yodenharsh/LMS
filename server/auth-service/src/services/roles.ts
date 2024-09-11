@@ -13,7 +13,7 @@ export async function populateRolesService(): Promise<bigint | null | undefined>
   else {
     const insertResult = await db.Connection.insertInto("roles")
       .values(
-        // @ts-ignore idk what this evne is
+        // @ts-ignore idk what this even is
         roles.map((role) => {
           return { name: role }
         }),
