@@ -7,9 +7,14 @@ export const getUsersByRoleAndSchoolId = async (
   res: Response,
 ) => {
   try {
+    if (!req.query.role_ids)
+      return res.status(400).json({
+        success: false,
+        message: "No `role_ids` query parameter provided",
+      })
     const roles = req.query.role_ids.split(",")
 
-    const results = getAllUsersBySchoolId(req.params.schoolId, roles)
+    const results = await getAllUsersBySchoolId(req.params.schoolId, roles)
     return res.status(200).json({
       success: true,
       data: results,
