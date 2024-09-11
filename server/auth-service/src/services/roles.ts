@@ -24,13 +24,13 @@ export async function populateRolesService(): Promise<bigint | null | undefined>
 }
 
 export async function getRoleByUserIdService(userId: string) {
-  const results = await db.Connection.selectFrom("roles")
-    .select(["name"])
-    .where("id", "=", userId)
-    .limit(1)
-    .executeTakeFirstOrThrow()
+  const results = await db.Connection.selectFrom("users as u")
+    .innerJoin("roles as r", "u.role_id", "r.id")
+    .select("r.name as name")
+    .where("u.id", "=", userId)
+    .executeTakeFirst()
 
-  return results.name
+  return results?.name
 }
 
 export async function getRoleByIdService(id: string) {

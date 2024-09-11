@@ -41,6 +41,7 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
         success: false,
         message: "Invalid credentials",
       })
+    console.log("hjere")
 
     // Start preparing the JWT
     const roleName = await getRoleByUserIdService(user.id)
@@ -49,7 +50,6 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
         success: false,
         message: "Something went wrong",
       })
-
     const authSuccessDetails = await generateAccessTokenService({ ...user, role: roleName })
     return res.status(200).json({
       success: true,
