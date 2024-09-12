@@ -3,19 +3,17 @@ import { jwtValidateAndReturnPayloadService } from "../services/jwt"
 import handleInvalidJwt from "../util/handleInvalidJwt"
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken"
 import logger from "../common/logger"
+import getBearerToken from "../util/getBearerToken"
 
-export const isLoggedInForSignUpMiddleware = async (
-  req: Request<{}, {}, any, { accessToken: string }>,
-  res: Response,
-  next: NextFunction,
-) => {
-  const accessToken = req.query.accessToken
+export const isLoggedInForSignUpMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const accessToken = getBearerToken(req)
 
-  if (typeof accessToken !== "string")
-    return res.status(401).json({
+  if (!accessToken) {
+    return res.status(400).json({
       success: false,
-      message: "Missing query parameter `accessToken`",
+      message: "Authorization header not in proper format",
     })
+  }
 
   try {
     jwtValidateAndReturnPayloadService(accessToken)
