@@ -1,6 +1,6 @@
 import db from "./db"
 
-export const getAllUsersBySchoolId = async (schoolId: string, roles: string[]) => {
+export const getAllUsersBySchoolIdService = async (schoolId: string, roles: string[]) => {
   const queryResults = db.Connection.selectFrom("users as u")
     .innerJoin("roles as r", "u.role_id", "r.id")
     .leftJoin("students as s", (join) => join.onRef("u.id", "=", "s.user_id").on("r.name", "=", "STUDENT"))

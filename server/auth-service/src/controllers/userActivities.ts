@@ -12,11 +12,12 @@ import {
   getProgramIdForStudent,
   isPasswordMatchingService,
 } from "../services/userActivities"
-import { getRoleByIdService, getRoleByUserIdService } from "../services/roles"
+import { getRoleByUserIdService } from "../services/roles"
 import logger from "../common/logger"
 import { generateAccessTokenService, jwtValidateAndReturnPayloadService } from "../services/jwt"
 import { RoleNameEnum } from "kysely-codegen"
 import { JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken"
+import handleInvalidJwt from "../util/handleInvalidJwt"
 
 export async function loginUserController(req: Request<{}, {}, z.infer<typeof loginRequestBody>>, res: Response) {
   const parsingResults = loginRequestBody.safeParse(req.body)
@@ -169,18 +170,7 @@ export const verifyAccessTokenController = (req: Request<{}, {}, {}, { accessTok
       data: jwtPayload,
     })
   } catch (err) {
-    if (err instanceof TokenExpiredError)
-      return res.status(401).json({
-        success: false,
-        message: "Token is expired",
-      })
-    else if (err instanceof JsonWebTokenError || err instanceof NotBeforeError) {
-      logger.info(err)
-      return res.status(401).json({
-        success: false,
-        message: err.message,
-      })
-    }
+    if (err instanceof TokenExpiredError || err instanceof JsonWebTokenError) handleInvalidJwt(err, res)
 
     logger.error("Error in verifyAccessToken controller " + err)
     return res.status(500).json({

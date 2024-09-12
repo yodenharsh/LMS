@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { getAllUsersBySchoolId } from "../services/users"
+import { getAllUsersBySchoolIdService } from "../services/users"
 import logger from "../common/logger"
 
 export const getUsersByRoleAndSchoolId = async (
@@ -14,7 +14,7 @@ export const getUsersByRoleAndSchoolId = async (
       })
     const roles = req.query.role_ids.split(",")
 
-    const results = await getAllUsersBySchoolId(req.params.schoolId, roles)
+    const results = await getAllUsersBySchoolIdService(req.params.schoolId, roles)
     return res.status(200).json({
       success: true,
       data: results,
