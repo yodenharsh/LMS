@@ -7,12 +7,16 @@ import {
   addStudentOrProgramDirectorToDBService,
   addSysAdminToDBService,
   findUserByUsernameService,
+  getCourseIdsForCourseProfessor,
+  getProgramIdForProgramDirector,
+  getProgramIdForStudent,
   isPasswordMatchingService,
 } from "../services/userActivities"
 import { getRoleByIdService, getRoleByUserIdService } from "../services/roles"
 import logger from "../common/logger"
-import { generateAccessTokenService } from "../services/jwt"
+import { generateAccessTokenService, jwtValidateAndReturnPayloadService } from "../services/jwt"
 import { RoleNameEnum } from "kysely-codegen"
+import { JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken"
 
 export async function loginUserController(req: Request<{}, {}, z.infer<typeof loginRequestBody>>, res: Response) {
   const parsingResults = loginRequestBody.safeParse(req.body)
@@ -26,7 +30,7 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
   try {
     const parsedBody = parsingResults.data
 
-    const user = await findUserByUsernameService(parsedBody.username)
+    const user: Record<string, any> | null = await findUserByUsernameService(parsedBody.username)
 
     if (user == null) {
       return res.status(401).json({
@@ -41,7 +45,6 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
         success: false,
         message: "Invalid credentials",
       })
-    console.log("hjere")
 
     // Start preparing the JWT
     const roleName = await getRoleByUserIdService(user.id)
@@ -50,7 +53,18 @@ export async function loginUserController(req: Request<{}, {}, z.infer<typeof lo
         success: false,
         message: "Something went wrong",
       })
-    const authSuccessDetails = await generateAccessTokenService({ ...user, role: roleName })
+
+    if (roleName === "STUDENT") user.programId = await getProgramIdForStudent(user.id)
+    else if (roleName === "PROGRAM_DIRECTOR") user.programId = await getProgramIdForProgramDirector(user.id)
+    else if (roleName === "COURSE_PROFESSOR") user.courseIds = await getCourseIdsForCourseProfessor(user.id)
+
+    const authSuccessDetails = await generateAccessTokenService({
+      ...user,
+      ...(user.school_id && { school: user.school_id }),
+      ...(user.programId && { program: user.programId }),
+      ...(user.courseIds && { courseIds: user.courseIds }),
+      role: roleName,
+    })
     return res.status(200).json({
       success: true,
       data: authSuccessDetails,
@@ -132,6 +146,43 @@ export async function userSignUpController(
     })
   } catch (err) {
     logger.error("Error in signup controller: " + err)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    })
+  }
+}
+
+export const verifyAccessTokenController = (req: Request<{}, {}, {}, { accessToken: string }>, res: Response) => {
+  if (!req.query.accessToken)
+    return res.status(400).json({
+      success: false,
+      message: "`accessToken` query parameter missing",
+    })
+
+  const accessToken = req.query.accessToken
+  try {
+    const jwtPayload = jwtValidateAndReturnPayloadService(accessToken)
+
+    return res.status(200).json({
+      success: true,
+      data: jwtPayload,
+    })
+  } catch (err) {
+    if (err instanceof TokenExpiredError)
+      return res.status(401).json({
+        success: false,
+        message: "Token is expired",
+      })
+    else if (err instanceof JsonWebTokenError || err instanceof NotBeforeError) {
+      logger.info(err)
+      return res.status(401).json({
+        success: false,
+        message: err.message,
+      })
+    }
+
+    logger.error("Error in verifyAccessToken controller " + err)
     return res.status(500).json({
       success: false,
       message: "Something went wrong",

@@ -6,7 +6,6 @@ import {
   SchoolHeadUserInsert,
   StudentOrProgramDirectorUserInsert,
 } from "../interfaces/user"
-import { hash } from "bun"
 
 export const findUserByUsernameService = async (username: string) => {
   const results = await db.Connection.selectFrom("users")
@@ -17,6 +16,33 @@ export const findUserByUsernameService = async (username: string) => {
 
   if (results.length === 0) return null
   else return results[0]
+}
+
+export const getProgramIdForStudent = async (userId: string) => {
+  const queryResults = await db.Connection.selectFrom("students")
+    .where("user_id", "=", userId)
+    .select("program_id")
+    .executeTakeFirst()
+
+  return queryResults?.program_id
+}
+
+export const getProgramIdForProgramDirector = async (userId: string) => {
+  const queryResults = await db.Connection.selectFrom("program_directors")
+    .where("user_id", "=", userId)
+    .select("program_id")
+    .executeTakeFirst()
+
+  return queryResults?.program_id
+}
+
+export const getCourseIdsForCourseProfessor = async (userId: string) => {
+  const queryResults = await db.Connection.selectFrom("course_professors")
+    .where("user_id", "=", userId)
+    .select("course_ids")
+    .executeTakeFirst()
+
+  return queryResults?.course_ids
 }
 
 export const isPasswordMatchingService = (encryptedPswd: string, userGivenPswd: string) => {

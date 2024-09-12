@@ -10,8 +10,8 @@ export const generateAccessTokenService = async (userInfo: {
   program?: string
   courseIds?: string[]
 }) => {
-  const expires_at = Math.floor(Date.now()) + 1000 * 60 * 60 * 24
-  const issued_at = Math.floor(Date.now())
+  const expires_at = Math.floor(Date.now() / 1000) + 60 * 60 * 24
+  const issued_at = Math.floor(Date.now() / 1000)
 
   const jwtPayload: JwtPayload = {
     sub: userInfo.id,
@@ -19,8 +19,8 @@ export const generateAccessTokenService = async (userInfo: {
     ...(userInfo.school && { school: userInfo.school }),
     ...(userInfo.program && { program: userInfo.program }),
     ...(userInfo.courseIds && { courseIds: userInfo.courseIds }),
+    iat: issued_at,
     expires_at,
-    issued_at,
   }
 
   const jwt = jsonwebtoken.sign(jwtPayload, appConfig.jwtSecretKey)
@@ -36,8 +36,8 @@ export const saveJwtToDB = async (jwtInfo: {
   issued_at: number
   expires_at: number
 }) => {
-  const expiresAtDate = new Date(jwtInfo.expires_at)
-  const issuedAtDate = new Date(jwtInfo.issued_at)
+  const expiresAtDate = new Date(jwtInfo.expires_at * 1000)
+  const issuedAtDate = new Date(jwtInfo.issued_at * 1000)
 
   await db.Connection.insertInto("jwts")
     .values({
@@ -49,4 +49,10 @@ export const saveJwtToDB = async (jwtInfo: {
     .executeTakeFirstOrThrow()
 
   return true
+}
+
+export const jwtValidateAndReturnPayloadService = (token: string) => {
+  const jwtPayload = jsonwebtoken.verify(token, appConfig.jwtSecretKey)
+
+  return jwtPayload
 }

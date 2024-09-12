@@ -5,5 +5,5 @@ export interface JwtPayload {
   program?: string
   courseIds?: string[]
   expires_at: number
-  issued_at: number
+  iat: number
 }
