@@ -1,5 +1,8 @@
 import { Router } from "express"
-import { authorizeNewSchoolMiddleware, authorizePatchSchoolMiddleware } from "../middlewares/authorizeMiddleware"
+import {
+  authorizeNewSchoolMiddleware,
+  authorizePatchSchoolMiddleware,
+} from "../middlewares/authorizeMiddleware/authorizeSchoolMiddleware"
 import { addSchoolsController, updateSchoolDetailsController } from "../controllers/schools"
 import { validatePatchSchoolDetailsRequestMiddleware } from "../middlewares/validateSchoolsRequest"
 

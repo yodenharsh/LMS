@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express"
-import getBearerToken from "../../utils/getBearerToken"
-import { getAccessTokenPayloadService } from "../services/auth"
-import { UpdateSchoolRequestBodySchema } from "../schemas/schools"
+import getBearerToken from "../../../utils/getBearerToken"
+import { getAccessTokenPayloadService } from "../../services/auth"
+import { UpdateSchoolRequestBodySchema } from "../../schemas/schools"
 import { z } from "zod"
 import axios from "axios"
 
