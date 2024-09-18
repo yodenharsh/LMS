@@ -4,3 +4,5 @@ export const AddSchoolRequestBodySchema = z.object({
   name: z.string(),
   schoolHeadId: z.string().uuid().optional(),
 })
+
+export const UpdateSchoolRequestBodySchema = AddSchoolRequestBodySchema.partial()
