@@ -9,7 +9,7 @@
     "url": "https://github.com/wubeZ/create-express-ts-starter.git"
   },
   "scripts": {
-    "dev": "bun run --watch src/server.ts",
+    "dev": "bun run --watch src/server.ts | bunx pino-pretty",
     "start": "bun dist/server.js | npx pino-pretty",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
