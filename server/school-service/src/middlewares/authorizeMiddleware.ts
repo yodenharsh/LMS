@@ -11,7 +11,7 @@ export const authorizeNewSchoolMiddleware = async (req: Request, res: Response, 
     })
 
   const tokenPayload = await getAccessTokenPayloadService(bearerToken)
-  if (tokenPayload.role !== "SYS_ADMIN")
+  if (tokenPayload.data.role !== "SYS_ADMIN")
     return res.status(403).json({
       success: false,
       message: "Unauthorized",

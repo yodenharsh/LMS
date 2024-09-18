@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken"
+import jsonwebtoken, { TokenExpiredError } from "jsonwebtoken"
 import appConfig from "../config/appConfig"
 import db from "./db"
 import { JwtPayload } from "../interfaces/jwt"
@@ -52,7 +52,14 @@ export const saveJwtToDB = async (jwtInfo: {
 }
 
 export const jwtValidateAndReturnPayloadService = (token: string) => {
-  const jwtPayload = jsonwebtoken.verify(token, appConfig.jwtSecretKey)
+  const jwtPayload = jsonwebtoken.verify(token, appConfig.jwtSecretKey) as JwtPayload
+
+  const currentUnixTimestamp = Math.floor(Date.now() / 1000)
+
+  // Check if the token has expired based on the 'expires_at' field
+  if (currentUnixTimestamp > jwtPayload.expires_at) {
+    throw new TokenExpiredError("Token expired", new Date(jwtPayload.expires_at * 1000)) // Token is expired
+  }
 
   return jwtPayload
 }

@@ -2,6 +2,8 @@ import { Request, Response } from "express"
 import { AddSchoolRequestBodySchema } from "../schemas/schools"
 import { addSchoolToDBService } from "../services/schools"
 import logger from "../common/logger"
+import { authService } from "../config/axiosConfig"
+import axios from "axios"
 
 export const addSchoolsController = async (req: Request, res: Response) => {
   const parsedBodyResults = AddSchoolRequestBodySchema.safeParse(req.body)
@@ -16,10 +18,25 @@ export const addSchoolsController = async (req: Request, res: Response) => {
     const schoolInfo = parsedBodyResults.data
 
     const newSchoolId = await addSchoolToDBService(schoolInfo)
+
+    try {
+      if (schoolInfo.schoolHeadId)
+        authService.patch(`/schools/assign-school/${schoolInfo.schoolHeadId}/school/${newSchoolId}`)
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        logger.error("Axios error in addSchoolsController: " + err)
+        return res.status(206).json({
+          success: true,
+          message: "Could not link school with school head ID",
+          data: { schoolId: newSchoolId },
+        })
+      } else throw err
+    }
+
     return res.status(201).json({
-      success: false,
+      success: true,
       data: {
-        userId: newSchoolId,
+        schoolId: newSchoolId,
       },
     })
   } catch (err) {

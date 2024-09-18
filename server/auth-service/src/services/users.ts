@@ -29,3 +29,13 @@ export const getAllUsersBySchoolIdService = async (schoolId: string, roles: stri
 
   return queryResults
 }
+
+export const alterSchoolService = async (userId: string, schoolId: string) => {
+  const alteredRecord = db.Connection.updateTable("users")
+    .set({ school_id: schoolId })
+    .where("id", "=", userId)
+    .returningAll()
+    .executeTakeFirstOrThrow()
+
+  return alteredRecord
+}
