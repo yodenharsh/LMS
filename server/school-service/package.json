@@ -10,13 +10,12 @@
   },
   "scripts": {
     "dev": "bun run --watch src/server.ts | bunx pino-pretty",
-    "start": "bun dist/server.js | npx pino-pretty",
+    "start": "bun dist/server.mjs | npx pino-pretty",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "build": "bun build src/server.ts --target=node --outfile=dist/server.js --minify",
     "prettier-watch": "onchange 'src/**/*.ts' -- prettier --write {{changed}}",
-    "prettier:fix": "prettier --write src/**/*.ts",
-    "prepare": "husky"
+    "prettier:fix": "prettier --write src/**/*.ts"
   },
   "keywords": [
     "typescript",
