@@ -4,6 +4,7 @@ import { getAccessTokenPayloadService } from "../../services/auth"
 import { z } from "zod"
 import { ProgramRequestAddBodySchema } from "../../schemas/programs"
 import axios from "axios"
+import logger from "../../common/logger"
 
 export const newProgramAuthorizationMiddleware = async (
   req: Request<any, any, z.infer<typeof ProgramRequestAddBodySchema>>,
@@ -33,11 +34,19 @@ export const newProgramAuthorizationMiddleware = async (
         success: false,
         message: "No schoolId included",
       })
+
+    next()
   } catch (err) {
+    logger.error("Error in authorizeProgramsMiddleware: " + err)
     if (axios.isAxiosError(err))
       return res.status(403).json({
         success: false,
         message: "Unauthorized",
+      })
+    else
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong",
       })
   }
 }
