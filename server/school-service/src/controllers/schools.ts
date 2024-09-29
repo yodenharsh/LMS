@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { AddSchoolRequestBodySchema, UpdateSchoolRequestBodySchema } from "../schemas/schools"
-import { addSchoolToDBService, updateSchoolService } from "../services/schools"
+import { addSchoolToDBService, getSchoolsService, updateSchoolService } from "../services/schools"
 import logger from "../common/logger"
 import { authService } from "../config/axiosConfig"
 import axios from "axios"
@@ -68,6 +68,22 @@ export const updateSchoolDetailsController = async (
       })
 
     logger.error("Error in updateSchoolDetailsController: " + err)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    })
+  }
+}
+
+export const getSchoolsController = async (req: Request, res: Response) => {
+  try {
+    const schoolsList = await getSchoolsService()
+    return res.status(200).json({
+      success: true,
+      data: schoolsList,
+    })
+  } catch (err) {
+    logger.error("Error in getSchoolsController: " + err)
     return res.status(500).json({
       success: false,
       message: "Something went wrong",

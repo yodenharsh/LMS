@@ -30,6 +30,9 @@ export const authorizeNewSchoolMiddleware = async (req: Request, res: Response, 
   }
 }
 
+// Alias for authorizeNewSchoolMiddleware
+export const authorizeGetSchoolsMiddleware = authorizeNewSchoolMiddleware
+
 export const authorizePatchSchoolMiddleware = async (
   req: Request<{ schoolId: string }, {}, z.infer<typeof UpdateSchoolRequestBodySchema>>,
   res: Response,

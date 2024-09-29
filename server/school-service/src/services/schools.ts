@@ -29,3 +29,9 @@ export const updateSchoolService = async (id: string, schoolInfo: z.infer<typeof
 
   return updationResults
 }
+
+export const getSchoolsService = async () => {
+  const schoolsList = await db.Connection.selectFrom("schools").selectAll().execute()
+
+  return schoolsList
+}
